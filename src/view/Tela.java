@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Properties;
 
 import javax.swing.JFrame;
@@ -20,6 +21,8 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.ImageIcon;
@@ -36,6 +39,8 @@ public class Tela extends JFrame {
 	private JTextField txtAssunto;
 	private JTextField txtDe;
 	private JComboBox<String> comboBox ;
+	private JTextField txtArquivo;
+	private File[] f;
 
 	/**
 	 * Launch the application.
@@ -73,7 +78,7 @@ public class Tela extends JFrame {
 		contentPane.add(lblEnviar);
 		
 		JTextPane txtMensagem = new JTextPane();
-		txtMensagem.setBounds(91, 129, 332, 82);
+		txtMensagem.setBounds(91, 168, 332, 82);
 		contentPane.add(txtMensagem);
 		
 		JLabel lblAssunto = new JLabel("Assunto");
@@ -86,7 +91,7 @@ public class Tela extends JFrame {
 		txtAssunto.setColumns(10);
 		
 		JLabel lblMensagem = new JLabel("Mensagem");
-		lblMensagem.setBounds(25, 129, 64, 14);
+		lblMensagem.setBounds(25, 162, 64, 14);
 		contentPane.add(lblMensagem);
 		
 		JButton btnEnviar = new JButton("Enviar");
@@ -99,8 +104,9 @@ public class Tela extends JFrame {
 					String assunto  = txtAssunto.getText();
 					String mensagem = txtMensagem.getText();
 					String emailDestinado = comboBox.getSelectedItem().toString();
+//					String caminhoArquivo = txtArquivo.getText();
 					Mail mail = new Mail();
-					mail.EnviarEmail(assunto, mensagem, emailDestinado);
+					mail.EnviarEmail(assunto, mensagem, emailDestinado, f);
 				}
 				
 			}
@@ -124,8 +130,60 @@ public class Tela extends JFrame {
 		
 		JLabel lblNewLabel = new JLabel("");
 		lblNewLabel.setIcon(new ImageIcon(Tela.class.getResource("/img/java.png")));
-		lblNewLabel.setBounds(25, 216, 64, 80);
+		lblNewLabel.setBounds(10, 181, 64, 80);
 		contentPane.add(lblNewLabel);
+		
+		JLabel lblArquivo = new JLabel("Arquivo");
+		lblArquivo.setBounds(25, 123, 56, 14);
+		contentPane.add(lblArquivo);
+		
+		JButton btnNewButton = new JButton("...");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				 	JFileChooser file = new JFileChooser(new File("C:/Users/Documents"));
+				 	
+				    file.setMultiSelectionEnabled(true);
+				    file.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				    int i = file.showOpenDialog(null);
+				    if (i == 1) {
+				        txtArquivo.setText("");
+				        f = null;
+				    } else {
+				        f = file.getSelectedFiles();
+				        
+				        String SomaAnexo1 = "";
+				        String SomaAnexo2 = "";
+				        for (File enderec : f) {
+				        	txtArquivo.setText(enderec.getPath());
+				            SomaAnexo1 = txtArquivo.getText();
+				            SomaAnexo2 = SomaAnexo2 + SomaAnexo1 + ";";
+				            txtArquivo.setText(SomaAnexo2);
+
+				        }
+				    }
+				
+			}
+		});
+		btnNewButton.setBounds(350, 120, 39, 20);
+		contentPane.add(btnNewButton);
+		
+		txtArquivo = new JTextField();
+		//txtArquivo.setText("C:\\Users\\Eduardo\\Downloads\\EDUARDO COSTA CARVALHO.pdf");
+		txtArquivo.setBounds(91, 120, 249, 20);
+		contentPane.add(txtArquivo);
+		txtArquivo.setColumns(10);
+		
+		JButton btnConfigurar = new JButton("Configurar");
+		btnConfigurar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Configurar configurar = new Configurar();
+				configurar.setLocationRelativeTo(null);
+				configurar.setVisible(true);
+			}
+		});
+		btnConfigurar.setIcon(new ImageIcon(Tela.class.getResource("/img/iconfinder_setting-gear-process-engineering_2075815.png")));
+		btnConfigurar.setBounds(91, 261, 122, 23);
+		contentPane.add(btnConfigurar);
 		//carregando funcões na inicialização da tela
 		carregarEmailCombobox() ;
 		carregarEmail();
@@ -156,6 +214,7 @@ public class Tela extends JFrame {
 			} catch (IOException e) {
 				JOptionPane.showMessageDialog(null , "Arquivo de configuração de email com problemas erro:"+e);
 			}
-			txtDe.setText(prop.getProperty("email"));
+			String email = new String(Base64.getDecoder().decode(prop.getProperty("email")));
+			txtDe.setText(email);
 		}
 }
